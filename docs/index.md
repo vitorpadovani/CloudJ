@@ -6,11 +6,11 @@
     2025.1
 
 
-## KIT-P
+## KIT-J
 
-João da Silva
+Daniel Djanikian
 
-Pedro de Souza
+Vitor Padovani
 
 
 ## Entregas
