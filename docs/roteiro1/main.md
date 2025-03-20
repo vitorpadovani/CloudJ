@@ -102,7 +102,7 @@ O NAT (Network Address Translation) é uma técnica que permite que dispositivos
 
 #### Configuração do NAT e das Regras de Gerenciamento no Roteador
 - **Acesso à Interface do Roteador:**  
-  A configuração é realizada através da interface administrativa do roteador, geralmente acessível via navegador através do IP do dispositivo.
+  A configuração é realizada através da interface administrativa do roteador, acessível via navegador através do IP do dispositivo.
 
 - **Definição das Regras de NAT:**  
   Na interface do roteador, configuramos as seguintes regras:
@@ -190,7 +190,7 @@ Acessivel a partir de uma conexão vinda da máquina MAIN na porta 5432.
 
 - **Reserva e Deploy da Máquina:**  
   Utilizando o MaaS CLI, reservamos uma máquina (originalmente designada como server2, mas, com o ajuste, ela se torna o novo server3 conforme a sequência), e realizamos o deploy através do CLI do MaaS. Vale ressaltar que, por conta do problema com a imagem, tivemos que refazer todos os deploys manualmente pelo MaaS.
-- **Clone e Instalação da Aplicação: VERIFICAR SE AINDA NECESSITA TER**  
+- **Clone e Instalação da Aplicação:**  
   Acessamos o servidor via SSH, clonamos o repositório da aplicação Django e executamos o script de instalação (`install.sh`).
   ```bash
   maas [login] machine deploy [system_id]
@@ -287,7 +287,7 @@ O Ansible é uma ferramenta de automação que permite gerenciar configurações
    sudo apt install ansible
    ```
 3. **Baixar o Playbook:**  
-   Um playbook é um arquivo YAML que contém uma série de instruções (ou "tasks") que definem como a aplicação Django deve ser instalada e configurada. Ao baixar esse arquivo, garantimos que todos os passos necessários serão executados de forma padronizada.
+   Um playbook é um arquivo YAML que contém uma série de instruções que definem como a aplicação Django deve ser instalada e configurada. Ao baixar esse arquivo, garantimos que todos os passos necessários serão executados de forma padronizada.
    ```bash
    wget https://raw.githubusercontent.com/raulikeda/tasks/master/tasks-install-playbook.yaml
    ```
@@ -298,7 +298,8 @@ O Ansible é uma ferramenta de automação que permite gerenciar configurações
    ansible-playbook tasks-install-playbook.yaml --extra-vars server=[IP server4]
    ```
 5. **Fazendo com que o server4 enxergue o server2**
-  Seguindo o mesmo processo feito para o server3, devemos fazer para o server4 enxergar o server2. Para isso entramos nas configuraçÕes do `/etc/hosts` no server3 e adicionamos uma entrada que associa o nome ("server2") ao respectivo endereço IP.
+
+    Seguindo o mesmo processo feito para o server3, devemos fazer para o server4 enxergar o server2. Para isso entramos nas configuraçÕes do `/etc/hosts` no server3 e adicionamos uma entrada que associa o nome ("server2") ao respectivo endereço IP.
 
 #### Por Que Usar o Ansible?
 
@@ -367,7 +368,7 @@ server { location / { proxy_pass http://backend; } }
 
 Além disso comentamos algumas linhas para que não houvesse conflitos das informaçÕes.
 
-Após todas as configuraçÕes realizadas no nginx, reiniciamos o serviço
+Após todas as configurações realizadas no nginx, reiniciamos o serviço
 
 ```bash
 sudo service nginx restart
