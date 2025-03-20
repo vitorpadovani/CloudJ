@@ -53,7 +53,7 @@ sudo snap install maas --channel=3.5/Stable
 
 - **Configuração do DHCP no MaaS:**
   - Como o switch não tem o serviço DHCP, ou seja, ele não consegue entregar IPs aos dispositivos na rede, vamos utilizar o roteador para isso.
-  - Habilitamos o DHCP na subrede configurada pelo MaaS Controller e ajustamos o Reserved Range para iniciar em 172.16.11.1 e terminar em 172.16.14.255, limitando o número de acessos a subrede.  
+  - Habilitamos o DHCP na subrede configurada pelo MaaS Controller e ajustamos o Reserved Range para iniciar em 172.16.11.1 e terminar em 172.16.14.255, dentro da sub-rede definida pela máscara 255.255.240.0. Essa configuração permite que os endereços atribuídos pelo DHCP fiquem restritos a uma parte do espaço de endereçamento disponível, ajudando a controlar e organizar os acessos dentro da rede.  
   - Desabilitamos o DHCP no roteador, para que o MaaS seja o responsável pela distribuição dos IPs.
 
 - **Verificações de Conectividade:**  
@@ -106,11 +106,11 @@ O NAT (Network Address Translation) é uma técnica que permite que dispositivos
 
 - **Definição das Regras de NAT:**  
   Na interface do roteador, configuramos as seguintes regras:
-  - **Regra de NAT:** Define que todos os dispositivos da subrede (172.16.0.0/20) usem o endereço IP público do roteador para acessar a internet.
-  - **Port Forwarding:** Cria uma regra para redirecionar conexões que chegam na porta 22 para o IP 172.16.0.3, permitindo o acesso remoto seguro ao servidor **main**.
+    1. **Regra de NAT:** Define que todos os dispositivos da subrede (172.16.0.0/20) usem o endereço IP público do roteador para acessar a internet.
+    2. **Port Forwarding:** Cria uma regra para redirecionar conexões que chegam na porta 22 para o IP 172.16.0.3, permitindo o acesso remoto seguro ao servidor **main**.
 
-- **Regras de Gerenciamento Remoto:**  
-  Adicionalmente, foi criada uma regra que permite o acesso remoto ao próprio roteador (regra de gestão), configurada para aceitar conexões de qualquer endereço (0.0.0.0/0). Essa regra possibilita a administração do roteador remotamente.
+    3. **Regras de Gerenciamento Remoto:**  
+    Adicionalmente, foi criada uma regra que permite o acesso remoto ao próprio roteador (regra de gestão), configurada para aceitar conexões de qualquer endereço (0.0.0.0/0). Essa regra possibilita a administração do roteador remotamente.
 
 Essa configuração garante que a rede local tenha acesso à internet por meio de um único endereço IP público, ao mesmo tempo que permite o gerenciamento remoto seguro tanto do servidor **main** quanto do roteador.
 
@@ -123,10 +123,12 @@ Além disso, durante a instalação das imagens nos servidores, encontramos um p
 
 ### 1. Ajuste no DNS do Servidor
 Antes de iniciar o deploy, foi preciso ajustar a configuração do DNS:
+
 - Acesse a aba **Subnets** no MaaS e edite a subnet `172.16.0.0/20`, alterando o campo Subnet summary para usar o DNS do Insper (`172.20.129.131`).
 
 ### 2. Primeira Parte: Configuração do Banco de Dados
 Utilizamos o PostgreSQL, um servidor de banco de dados robusto e amplamente utilizado em projetos open source, conforme os passos abaixo:
+
 - **Deploy do Ubuntu:**  
   No MaaS, foi realizado o deploy do Ubuntu 22.04 no servidor designado (que originalmente seria o server1, mas considerando o ajuste, este é agora o server2).
 - **Instalação e Configuração do PostgreSQL:**  
@@ -208,11 +210,12 @@ Acessivel a partir de uma conexão vinda da máquina MAIN na porta 5432.
     ```bash
     nano portfolio/settings.py 
     ```
+    
   - **Fazendo com que o server3 Enxergue o server2**
 
-  Como apenas o servidor **main** consegue visualizar todas as máquinas (devido à sua função de controlador do MaaS), precisamos informar o server3 sobre a localização do server2, que hospeda o PostgreSQL para a aplicação Django. Para isso, editamos o arquivo `/etc/hosts` no server3 e adicionamos uma entrada que associa o nome ("server2") ao respectivo endereço IP.
+    Como apenas o servidor **main** consegue visualizar todas as máquinas (devido à sua função de controlador do MaaS), precisamos informar o server3 sobre a localização do server2, que hospeda o PostgreSQL para a aplicação Django. Para isso, editamos o arquivo `/etc/hosts` no server3 e adicionamos uma entrada que associa o nome ("server2") ao respectivo endereço IP.
 
-  Essa ação garante que, mesmo sem acesso direto à tabela de DNS da rede, o server3 consiga resolver o nome do server2 e estabelecer comunicação com ele. Além disso, desabilitamos a configuração para que essa alteração não seja perdida após uma reinicialização.
+    Essa ação garante que, mesmo sem acesso direto à tabela de DNS da rede, o server3 consiga resolver o nome do server2 e estabelecer comunicação com ele. Além disso, desabilitamos a configuração para que essa alteração não seja perdida após uma reinicialização.
     ```bash
     sudo nano /etc/hosts 
     ```
@@ -230,12 +233,30 @@ Esse túnel faz com que utilizemos a porta 8001 do computador local para acessar
 
 ### Tarefa 2
 
-ADICIONAR OS PRINTS DA TAREFA 2 AQUI QUE ESTÃO NO COMPUTADOR DO PADOVANI
+![Tela do Dashboard do MAAS](./tarefa2-1.png)
+/// caption
+Dashboard do MAAS com Server 2 e 3 deployados
+///
 
+![Tela do Dashboard do MAAS](./tarefa2-2.png)
+/// caption
+Comprovação das imagens do Ubuntu sincronizadas
+///
+
+![Tela do Dashboard do MAAS](./tarefa2-3-2.png)
+![Tela do Dashboard do MAAS](./tarefa2-3-3.png)
+![Tela do Dashboard do MAAS](./tarefa2-3-4.png)
+![Tela do Dashboard do MAAS](./tarefa2-3-5.png)
+/// caption
+Todas as máquinas passaram nos testes de hardware e commissioning com status "OK"
+///
 
 ### Tarefa 3
 
-PRIMEIRO PRINT ESTA COM O PADOVANI
+![Tela do Dashboard do MAAS](./tarefa3-1.png)
+/// caption
+Dashboard do MAAS com os IPS das máquinas
+///
 
 ![Tela do Dashboard do MAAS](./django1.png)
 /// caption
@@ -276,7 +297,7 @@ O Ansible é uma ferramenta de automação que permite gerenciar configurações
    ```bash
    ansible-playbook tasks-install-playbook.yaml --extra-vars server=[IP server4]
    ```
-5. **Fazendo com que o server4 Enxergue o server2**
+5. **Fazendo com que o server4 enxergue o server2**
   Seguindo o mesmo processo feito para o server3, devemos fazer para o server4 enxergar o server2. Para isso entramos nas configuraçÕes do `/etc/hosts` no server3 e adicionamos uma entrada que associa o nome ("server2") ao respectivo endereço IP.
 
 #### Por Que Usar o Ansible?
@@ -295,7 +316,10 @@ O Ansible é uma ferramenta de automação que permite gerenciar configurações
 
 ### Tarefa 4
 
-PRIMEIRO PRINT ESTA COM O PADOVANI
+![Tela do Dashboard do MAAS](./tarefa4-1.png)
+/// caption
+Dashboard do MAAS com as 3 Maquinas e seus respectivos IPs
+///
 
 ![Tela do Dashboard do MAAS](./django1.png)
 /// caption
@@ -356,7 +380,10 @@ Para verificar o funcionamento, modificamos a função `index` do arquivo `tasks
 
 ### Tarefa 5
 
-PRIMEIRO PRINT ESTA COM O PADOVANI
+![Tela do Dashboard do MAAS](./tarefa5-1.png)
+/// caption
+Dashboard do MAAS com as 4 Maquinas e seus respectivos IPs
+///
 
 ![Tela do Dashboard do MAAS](./views3.png)
 /// caption
