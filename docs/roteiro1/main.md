@@ -36,12 +36,14 @@ O objetivo desta etapa é preparar a rede física e lógica, garantindo que todo
 
 
 - **Instalação do MaaS:**  
-  Utilizamos o MaaS (versão 3.5) para orquestrar e gerenciar o hardware do NUC main.  
+  Utilizamos o MaaS (versão 3.5) para orquestrar e gerenciar o hardware do NUC main.
+<!--termynal -->    
 ``` bash
 sudo snap install maas --channel=3.5/Stable
 ```
 - **Configuração Inicial do MaaS:**  
   - Inicializamos o MaaS com a URL e o banco de dados de teste.  
+  <!--termynal -->  
   ``` bash
   sudo maas init region+rack --maas-url http://172.16.0.3:5240/MAAS --database-uri maas-test-db:///
   ```
@@ -134,28 +136,34 @@ Utilizamos o PostgreSQL, um servidor de banco de dados robusto e amplamente util
 - **Instalação e Configuração do PostgreSQL:**  
   No terminal do servidor (acessado via SSH), executamos os seguintes procedimentos:
   - Atualização do sistema.
+  <!--termynal -->  
   ``` bash
   sudo apt update
   ```
   - Instalação dos pacotes do PostgreSQL e suas contribuições.
+  <!--termynal -->  
   ```bash
   sudo apt install postgresql postgresql-contrib -y
   ```
   - Criação de um usuário para a aplicação (usuário `cloud` com senha `cloud`).
+  <!--termynal -->  
   ```bash
   sudo su - postgres
   createuser -s cloud -W
   ```
   - Criação de uma base de dados (por exemplo, `tasks`).
+  <!--termynal -->  
   ```bash
   createdb -O cloud tasks
   ```
   - Edição do arquivo de configuração do PostgreSQL para que o serviço aceite conexões remotas (definindo `listen_addresses = '*'`).
+  <!--termynal -->  
   ```bash
   nano /etc/postgresql/14/main/postgresql.conf
   ```
   - Ajuste no arquivo de controle de acesso (`pg_hba.conf`) para liberar conexões vindas da subnet `172.16.0.0/20`.
   - Liberação da porta (5432) no firewall e reinicialização do serviço.
+  <!--termynal -->  
   ```bash
   sudo ufw allow 5432/tcp
   sudo systemctl restart postgresql
@@ -192,6 +200,7 @@ Acessivel a partir de uma conexão vinda da máquina MAIN na porta 5432.
   Utilizando o MaaS CLI, reservamos uma máquina (originalmente designada como server2, mas, com o ajuste, ela se torna o novo server3 conforme a sequência), e realizamos o deploy através do CLI do MaaS. Vale ressaltar que, por conta do problema com a imagem, tivemos que refazer todos os deploys manualmente pelo MaaS.
 - **Clone e Instalação da Aplicação:**  
   Acessamos o servidor via SSH, clonamos o repositório da aplicação Django e executamos o script de instalação (`install.sh`).
+  <!--termynal -->  
   ```bash
   maas [login] machine deploy [system_id]
   git clone https://github.com/raulikeda/tasks.git
@@ -202,11 +211,13 @@ Acessivel a partir de uma conexão vinda da máquina MAIN na porta 5432.
   - **Instalando e configurando o Django (Parte da Tarefa 3):**
   
     Após o deploy manual da nossa máquina, por conta do erro, para baixar a aplicação do Django, entramos no server3 e rodamos os seguintes comandos para instalar o Django:
+    <!--termynal -->  
     ```bash
     sudo apt install python3-psycopg2
     pip install django --break-system-packages 
     ```
     Além disso, para a aplicação funcionar, modificamos o arquivo `settings.py` do Django para indicar que o banco de dados que iremos utilizar estará no server2 e ajustamos os `ALLOWED_HOSTS` para permitir o acesso sem problemas a partir do main.
+    <!--termynal -->  
     ```bash
     nano portfolio/settings.py 
     ```
@@ -216,20 +227,23 @@ Acessivel a partir de uma conexão vinda da máquina MAIN na porta 5432.
     Como apenas o servidor **main** consegue visualizar todas as máquinas (devido à sua função de controlador do MaaS), precisamos informar o server3 sobre a localização do server2, que hospeda o PostgreSQL para a aplicação Django. Para isso, editamos o arquivo `/etc/hosts` no server3 e adicionamos uma entrada que associa o nome ("server2") ao respectivo endereço IP.
 
     Essa ação garante que, mesmo sem acesso direto à tabela de DNS da rede, o server3 consiga resolver o nome do server2 e estabelecer comunicação com ele. Além disso, desabilitamos a configuração para que essa alteração não seja perdida após uma reinicialização.
+    <!--termynal -->  
     ```bash
     sudo nano /etc/hosts 
     ```
   
   **Teste da Aplicação:**  
   Após reiniciar a máquina, testamos o acesso à aplicação via terminal do MaaS utilizando um comando para verificar a porta 8080.
+  <!--termynal -->  
   ```bash
-  wget http://[IP server3]:8080/admin/
+  wget http://172.16.0.15:8080/admin/
   ```  
   Para acesso no browser, criamos um túnel SSH redirecionando a porta 8080 do servidor para a porta 8001 local.
+  <!--termynal -->  
   ```bash
-  ssh cloud@10.103.0.X -L 8001:[IP server3]:8080
+  ssh cloud@10.103.1.19 -L 8001:172.16.0.15:8080
   ```
-Esse túnel faz com que utilizemos a porta 8001 do computador local para acessar o que está na porta 8080 do server3. Isso significa que qualquer solicitação feita para http://localhost:8001/admin/ será redirecionada para http://server2:8080/admin/. Dessa forma, podemos acessar a interface de administração do django do server3 localmente através do navegador web.
+Esse túnel faz com que utilizemos a porta 8001 do computador local para acessar o que está na porta 8080 do server3. Isso significa que qualquer solicitação feita para http://localhost:8001/admin/ será redirecionada para http://172.16.0.15:8080/admin/. Dessa forma, podemos acessar a interface de administração do django do server3 localmente através do navegador web.
 
 ### Tarefa 2
 
@@ -283,19 +297,22 @@ O Ansible é uma ferramenta de automação que permite gerenciar configurações
 
 2. **Instalação do Ansible no Servidor Principal:**  
    Instalamos o Ansible no servidor principal (**main**). Isso transforma o main em um controlador central que se conecta às máquinas remotas para executar os comandos necessários.
+   <!--termynal -->  
    ```bash
    sudo apt install ansible
    ```
 3. **Baixar o Playbook:**  
    Um playbook é um arquivo YAML que contém uma série de instruções que definem como a aplicação Django deve ser instalada e configurada. Ao baixar esse arquivo, garantimos que todos os passos necessários serão executados de forma padronizada.
+   <!--termynal -->  
    ```bash
    wget https://raw.githubusercontent.com/raulikeda/tasks/master/tasks-install-playbook.yaml
    ```
 
 4. **Execução do Playbook:**  
    Com o playbook em mãos, utilizamos o comando do Ansible para executá-lo, passando o IP do server4 como variável extra. Esse processo automatiza a instalação da aplicação Django, realizando as mesmas ações que seriam feitas manualmente (como instalação de pacotes, configuração de serviços e deploy da aplicação), mas sem a necessidade de intervenção manual em cada servidor.
+   <!--termynal -->  
    ```bash
-   ansible-playbook tasks-install-playbook.yaml --extra-vars server=[IP server4]
+   ansible-playbook tasks-install-playbook.yaml --extra-vars server=172.16.0.17
    ```
 5. **Fazendo com que o server4 enxergue o server2**
 
@@ -349,7 +366,7 @@ A diferença entre instalar manualmente a aplicação Django e utilizar o Ansibl
 O balanceamento de carga com proxy reverso tem como objetivo centralizar o acesso à aplicação, de forma que uma única entrada redirecione as requisições para vários servidores que hospedam a aplicação Django. Essa abordagem é essencial para garantir **alta disponibilidade** e **redundância**: se um dos servidores falhar, os outros continuam atendendo as requisições, mantendo a estabilidade do serviço.
 
 Nesse cenário, instalamos o **NGINX** no **server5** para atuar como proxy reverso. O primeiro passo é instalar o NGINX, utilizando o gerenciador de pacotes do sistema:
-
+<!--termynal -->  
 ```bash
 sudo apt-get install nginx
 ```
@@ -357,7 +374,7 @@ sudo apt-get install nginx
 Após a instalação, editamos o arquivo de configuração do NGINX, localizado em `/etc/nginx/sites-available/default`. Nele, definimos o bloco *upstream* que aponta para os servidores backend onde a aplicação Django está rodando:
 
 ~~~
-upstream backend { server IP SERVER3:8080; server IP SERVER4:8080; }
+upstream backend { server 172.16.0.15:8080; server 172.16.0.17:8080; }
 ~~~
 
 Em seguida, configuramos o servidor virtual para encaminhar todas as requisições que chegarem na porta 80 para o grupo de servidores definido acima, utilizando a diretiva `proxy_pass`:
@@ -370,6 +387,7 @@ Além disso comentamos algumas linhas para que não houvesse conflitos das infor
 
 Após todas as configurações realizadas no nginx, reiniciamos o serviço
 
+<!--termynal -->  
 ```bash
 sudo service nginx restart
 ```
