@@ -1,8 +1,8 @@
 site_name: Computação em Nuvem
 site_author: Daniel D.; Vitor P.
-site_url: https://hsandmann.github.io/insper.cloud.template
-repo_url: https://github.com/hsandmann/insper.cloud.template
-repo_name: github/insper.cloud.template
+site_url: https://vitorpadovani.github.io/CloudJ
+repo_url: https://github.com/vitorpadovani/CloudJ
+repo_name: vitorpadovani/CloudJ
 
 theme:
   name: material
