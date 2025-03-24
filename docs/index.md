@@ -16,7 +16,7 @@ Vitor Padovani
 ## Entregas
 
 - [x] Roteiro 1 - Data 23/02/2025
-- [ ] Roteiro 2 - Data 13/03/2025
+- [x] Roteiro 2 - Data 13/03/2025
 - [ ] Roteiro 3
 - [ ] Roteiro 4
 - [ ] Projeto
