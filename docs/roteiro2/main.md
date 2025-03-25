@@ -111,8 +111,38 @@ Sendo o Grafana responsável por **simplificar a apresentação visual de dados*
 
 Com ambas instaladas, será possível acompanhar o desempenho e a integridade dos serviços em execução através de um **dashboard**.
 
+### 1. Deploy do Dashboard do Juju
 
-### 1. Deploy do Grafana e Prometheus
+O primeiro passo foi instalar o **dashboard do Juju**, para isso, voltamos para o controller do Juju e utilizamos o charm do Juju para instalar o dashboard.
+
+``` bash
+juju switch controller
+```
+
+Além disso, criamos a tag dashboard-juju no MAAS para que o Juju pudesse instalar o dashboard na máquina correta. Essa tag foi atribuída ao server3 para o deploy do dashboard e utilizada com o parâmetro `--constraints tags=dashboard-juju`.
+
+``` bash
+juju deploy juju-dashboard dashboard --constraints tags=dashboard-juju
+```
+
+Após o deploy, conseguimos integrar o controller com o dashboard do Juju e expor o serviço para acesso externo.
+
+``` bash
+juju integrate dashboard controller
+```
+
+``` bash
+juju expose dashboard
+```
+
+Agora, nosso serviço de dashboard do Juju está disponível para acesso externo.
+
+``` bash
+juju dashboard
+```
+
+
+### 2. Deploy do Grafana e Prometheus
 
 Criamos uma pasta para armazenar os charms que serão utilizados no deploy das aplicações.
 
@@ -154,7 +184,7 @@ Apesar disso, tivemos um problema com o deploy do Grafana, pois a versão do cha
 juju deploy ./grafana_r69.charm --base ubuntu@20.04
 ```
 
-### 2. Integração entre Grafana e Prometheus
+### 3. Integração entre Grafana e Prometheus
 
 No Juju, uma integração é uma conexão entre duas ou mais aplicações. Essa conexão é estabelecida devido ao fato de uma aplicação ter um endpoint (ponto de comunicação) específico que permite a interação com outras aplicações.
 
@@ -166,7 +196,7 @@ Para isso, é necessário configurar o Prometheus como um **data source** no Gra
 juju integrate prometheus2:grafana–source grafana:grafana-source 
 ```
 
-### 3. Acessando o Grafana
+### 4. Acessando o Grafana
 
 Para acessar o Grafana rodando no server4 por meio de um túnel SSH. Criamos uma conexão segura entre o nosso localhost e o server4, utilizando a funcionalidade de redirecionamento de portas do SSH. 
 
