@@ -21,7 +21,7 @@ Para produção desse roteiro foi necessária a conclusão da etapa do Bare Meta
 
 ## Criando a Infraestrutura
 
-Nesta etapa, configuraremos o Juju para gerenciar a infraestrutura de servidores anteriormente ciradas e configuradas e que estão sendo gerenciados pelo MAAS.
+Nesta etapa, configuraremos o Juju para gerenciar a infraestrutura de servidores anteriormente criadas e configuradas e que estão sendo gerenciados pelo MAAS.
 
 Diferente do Ansible, que utilizamos para automatizar a instalação e configuração de serviços no roteiro anterior, o Juju consegue integrar-se diretamente ao MAAS, atuando como um orquestrador de deploy que provisiona e gerencia os recursos computacionais dinamicamente.
 
@@ -34,7 +34,7 @@ Utilizamos o Juju 3.6 para este roteiro, que será utilizado para gerenciar a in
 sudo snap install juju --channel 3.6
 ```
 
-O Juju utilizará o MAAS para provedor de máquinas e sistema operacional, ou seja, haverá uma integração entre o Juju e o MAAS. Para isso, foi necessário configurá-lo para que possa exergar o MAAS. Foi feita a criação de dois arquivos para definição do cloud e do credential.
+O Juju utilizará o MAAS para provedor de máquinas e sistema operacional, ou seja, haverá uma integração entre o Juju e o MAAS. Para isso, foi necessário configurá-lo para que possa enxergar o MAAS. Foi feita a criação de dois arquivos para definição do cloud e do credential.
 
 Primeiro criamos o arquivo `maas-cloud.yaml` que informa ao Juju onde encontrar o serviço MAAS e como ele deve se autenticar.
 Utilizamos o endereço local e sua porta padrão para conexão que é 5240.
@@ -44,7 +44,7 @@ clouds:
     maas-one:
         type: maas
         auth-types: [oauth1]
-        endpoint: http://192.168.0.3:5240/MAAS/
+        endpoint: http://172.16.0.3:5240/MAAS/
 ```
 
 Em seguida, importamos o arquivo de configuração para o Juju.
@@ -75,7 +75,7 @@ juju add-credential --client -f maas-creds.yaml maas-one
 
 O Juju precisa de um controller, uma máquina exclusiva para gerenciar a orquestração dos serviços. Além disso, ele é o componente central que gerencia o ciclo de vida das aplicações. Ele é responsável por alocar máquinas, monitorar os serviços e gerenciar o deploy de novas aplicações.
 
-Para isso, utilizaremos o server1, que deve foi marcado com a tag juju dentro do painel do MAAS.
+Para isso, utilizaremos o server1, que foi marcado com a tag juju dentro do painel do MAAS.
 
 ``` bash
 juju bootstrap --bootstrap-series=jammy --constraints tags=juju maas-one maas-controller
