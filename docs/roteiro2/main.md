@@ -248,3 +248,20 @@ Acesso remoto ao Dashboard a partir da rede do Insper
 /// caption
 Aplicações sendo gerenciadas pelo JUJU
 ///
+
+## Discussão
+1. A combinação entre Juju e MAAS simplificou a automação do gerenciamento de infraestrutura, permitindo o provisionamento rápido e eficiente de servidores físicos e virtuais.
+
+2. O uso de charms para o deployment de serviços garantiu uma instalação padronizada e a consistência entre diferentes ambientes, o que facilita a replicação e a escalabilidade da infraestrutura.
+
+3. A utilização de tags no MAAS e modelos no Juju foi crucial para separar e organizar ambientes de forma eficiente, promovendo uma gestão mais clara e estruturada da infraestrutura.
+
+4. A incompatibilidade de versão do charm Grafana com a versão do Ubuntu ataraplhou o desenvolvimento foi resolvida utilizando a flag --force, permitindo a continuidade do deployment sem maiores impactos.
+
+5. A integração entre Grafana e Prometheus proporcionou uma visão clara e em tempo real do desempenho da infraestrutura, facilitando a análise e a resolução de possíveis problemas.
+
+6. O SSH foi utilizado para acessar de forma segura os dashboards do Grafana, garantindo que a comunicação com a infraestrutura fosse protegida.
+
+## Conclusão
+Em suma, a integração entre Juju e MAAS, junto ao uso de charms para deployment, foi fundamental para automatizar e organizar de forma eficaz o gerenciamento da infraestrutura. A compatibilidade e os problemas técnicos foram superados com rapidez, garantindo uma implementação bem-sucedida. O uso de ferramentas como Grafana e Prometheus permitiu monitorar em tempo real a performance, proporcionando visibilidade e controle essenciais para a otimização contínua dos serviços. A automação oferecida pelo Juju se mostrou uma solução poderosa, facilitando o gerenciamento e manutenção da infraestrutura.
+
