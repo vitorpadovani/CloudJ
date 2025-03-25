@@ -113,7 +113,7 @@ Com ambas instaladas, será possível acompanhar o desempenho e a integridade do
 
 ### 1. Deploy do Dashboard do Juju
 
-O primeiro passo foi instalar o **dashboard do Juju**, para isso, voltamos para o controller do Juju e utilizamos o charm do Juju para instalar o dashboard.
+O primeiro passo foi instalar o **dashboard do Juju**, para isso, voltamos para o controller do Juju para instalar o dashboard.
 
 ``` bash
 juju switch controller
@@ -178,10 +178,10 @@ juju deploy ./grafana_XXX.charm
 
 OBS: **XXX** é a versão do charm, que no caso foi r69
 
-Apesar disso, tivemos um problema com o deploy do Grafana, pois a versão do charm não enxergava a imagem do ubuntu 22.04, que era a versão utilizada nas máquinas. Para resolver, o próprio Juju instalou a versão 20.04. No entanto, para concluir o processo, foi necessário utilizar a flag no comando de deploy para garantir que o processo fosse concluído.
+Apesar disso, tivemos um problema com o deploy do Grafana, pois a versão do charm não enxergava a imagem do ubuntu 22.04, que era a versão utilizada nas máquinas. Para resolver, o próprio Juju instalou a versão 20.04. No entanto, para concluir o processo, foi necessário utilizar a flag `--force` no comando de deploy para garantir que o processo fosse concluído.
 
 ``` bash
-juju deploy ./grafana_r69.charm --base ubuntu@20.04
+juju deploy ./grafana_r69.charm --force
 ```
 
 ### 3. Integração entre Grafana e Prometheus
@@ -203,7 +203,7 @@ Para acessar o Grafana rodando no server4 por meio de um túnel SSH. Criamos uma
 Esse túnel permite que o tráfego da porta 8001 no nosso computador local seja redirecionado para a porta 3000 no server4, onde o Grafana está ouvindo, como se estivesse rodando localmente em nossa máquina.
 
 ``` bash
-ssh cloud@10.103.1.19 -L 8001:[IP server4]:3000
+ssh cloud@10.103.1.19 -L 8001:172.16.0.25:3000
 ```
 
 Assim, ao acessar o endereço `http://localhost:8001` no navegador, conseguimos visualizar o Grafana.
