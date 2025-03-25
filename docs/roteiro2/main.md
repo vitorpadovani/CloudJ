@@ -135,11 +135,16 @@ juju integrate dashboard controller
 juju expose dashboard
 ```
 
-Agora, nosso serviço de dashboard do Juju está disponível para acesso externo.
+Agora, nosso serviço de dashboard do Juju está disponível para acesso externo. Com esse código, obtivemos o endereço e as credenciais para acesso.
 
 ``` bash
 juju dashboard
 ```
+
+Além disso, foi necessário criar um túnel SSH para acessar o dashboard do Juju remotamente. O comando abaixo cria uma conexão segura entre o nosso localhost e o server3, onde o dashboard do Juju está rodando.
+
+``` bash
+ssh cloud@10.103.1.19 -L 31666:172.16.0.22:8080
 
 
 ### 2. Deploy do Grafana e Prometheus
