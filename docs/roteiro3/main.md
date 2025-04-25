@@ -215,3 +215,227 @@ juju integrate placement:identity-service keystone:identity-service
 juju integrate placement:placement nova-cloud-controller:placement
 juju integrate placement:certificates vault:certificates
 ```
+
+Horizon também foi instalado. Ela é a interface web usada para gerenciar os serviços do OpenStack de forma visual. 
+
+```bash
+juju deploy --to lxd:2 --channel yoga/stable openstack-dashboard
+```
+
+```bash
+juju deploy --channel 8.0/stable mysql-router dashboard-mysql-router
+juju integrate dashboard-mysql-router:db-router mysql-innodb-cluster:db-router
+juju integrate dashboard-mysql-router:shared-db openstack-dashboard:shared-db
+```
+
+```bash
+juju integrate openstack-dashboard:identity-service keystone:identity-service
+juju integrate openstack-dashboard:certificates vault:certificates
+```
+
+O Glance é o serviço de gerenciamento de imagens de disco no OpenStack. Ele permite que usuários armazenem, descubram e recuperem imagens de máquinas virtuais.
+
+```bash
+juju deploy --to lxd:2 --channel yoga/stable glance
+```
+
+Interligando o glance com a base de dados
+
+```bash
+juju deploy --channel 8.0/stable mysql-router glance-mysql-router
+juju integrate glance-mysql-router:db-router mysql-innodb-cluster:db-router
+juju integrate glance-mysql-router:shared-db glance:shared-db
+```
+
+```bash
+juju integrate glance:image-service nova-cloud-controller:image-service
+juju integrate glance:image-service nova-compute:image-service
+juju integrate glance:identity-service keystone:identity-service
+juju integrate glance:certificates vault:certificates
+```
+
+O Ceph Monitor é o serviço responsável por manter a visão consistente e distribuída do cluster de armazenamento Ceph. Ele rastreia o estado dos OSDs (Object Storage Daemons) e ajuda a coordenar as operações entre os nós de armazenamento, além de monitorar a saúde do cluster.
+
+```bash
+ceph-mon:
+  expected-osd-count: 3
+  monitor-count: 3
+```
+
+OBS: Composto por três nós e que deve esperar pelo menos três OSDs
+
+```bash
+juju deploy -n 3 --to lxd:0,lxd:1,lxd:2 --channel quincy/stable --config ceph-mon.yaml ceph-mon
+```
+
+```bash
+juju integrate ceph-mon:osd ceph-osd:mon
+juju integrate ceph-mon:client nova-compute:ceph
+juju integrate ceph-mon:client glance:ceph
+```
+
+###############Falta o 15 16 e 17
+
+
+
+
+Iremos agora configurar os serviços que controlam as Virtual Machines, o Volume de Disco e a Estrutura de Rede Virtual
+Primeiro, vamos carregar as variáveis de ambiente e se autenticar no OpenStack
+
+Para isso, utilizamos o comando `openrc` que é um script que carrega as variáveis de ambiente necessárias para autenticação. O script é gerado pelo OpenStack e deve ser baixado na interface web do OpenStack.
+
+```bash
+sudo snap install openstackclients
+```
+
+Baixamos o arquivo direto da interface web do OpenStack e configuramos o ambiente do usuário administrador
+
+```bash
+wget https://docs.openstack.org/project-deploy-guide/charm-deployment-guide/latest/_downloads/c894c4911b9572f0b5f86bdfc5d12d8e/openrc
+```
+
+```bash
+source ~/openrc
+```
+
+```bash
+env | grep OS_
+```
+
+Para entrada no OpenStack dashboard fizemos um túnel SSH para acessar o dashboard do OpenStack.
+
+```bash
+ssh cloud@10.103.0.X -L 8001:172.16.0.39:80
+```
+
+O acesso ao dashboard é feito pelo navegador, acessando o endereço `http://localhost:8001` e utilizando o usuário admin e a senha obtido pelo `env | grep OS_`
+
+### Tarefa 1
+Verificando se o acesso ao Dashboard do OpenStack está funcionando, ou seja, se conseguimos acessar a interface web do OpenStack.
+
+
+![Tela do Dashboard do MAAS](img/tarefa1-1.png)
+/// caption
+Status do JUJU
+///
+
+![Tela do Dashboard do MAAS](img/tarefa1-2.png)
+/// caption
+Dashboard do MAAS com as máquinas
+///
+
+![Tela do Dashboard do MAAS](img/tarefa1-3.png)
+/// caption
+Aba compute overview no OpenStack Dashboard
+///
+
+![Tela do Dashboard do MAAS](img/tarefa1-4.png)
+/// caption
+Aba compute instances no OpenStack Dashboard
+///
+
+![Tela do Dashboard do MAAS](img/tarefa1-5.png)
+/// caption
+Aba network topology no OpenStack Dashboard
+///
+
+Criamos o cliente via snap, carregamos o openrc e verificamos se o cliente está funcionando
+
+
+```bash
+source openrc
+```
+
+```bash
+openstack service list
+```
+
+Além disso, fizemos pequenos ajustes de rede
+```bash
+juju config neutron-api enable-ml2-dns="true"
+juju config neutron-api-plugin-ovn dns-servers="172.16.0.1"
+```
+
+Carregamos a imagem do Ubuntu 22.04 no OpenStack, para isso utilizamos o comando `openstack image create` que cria uma imagem no OpenStack. O comando é utilizado para criar uma imagem de disco que pode ser utilizada para criar instâncias de máquinas virtuais.
+
+```bash
+mkdir ~/cloud-images
+
+wget http://cloud-images.ubuntu.com/jammy/current/jammy-server-cloudimg-amd64.img \
+   -O ~/cloud-images/jammy-amd64.img
+```
+
+```bash
+openstack image create --public --container-format bare \
+   --disk-format qcow2 --file ~/cloud-images/jammy-amd64.img \
+   jammy-amd64
+```
+
+Para definir um perfil de hardware para a imagem, utilizamos o comando `openstack flavor create` que cria um perfil de hardware no OpenStack. O comando pode ser utilizado para criar instâncias de máquinas virtuais.
+
+```bash
+openstack flavor create --ram 1024 --disk 20 --vcpus 1 m1.tiny
+```
+
+```bash
+openstack flavor create --ram 2048 --disk 20 --vcpus 1 m1.small
+```
+
+```bash
+openstack flavor create --ram 4096 --disk 20 --vcpus 2 m1.medium
+```
+
+```bash
+openstack flavor create --ram 8192 --disk 20 --vcpus 4 m1.large
+```
+
+OBS: O parâmetro `--ram` define a quantidade de memória RAM da instância e o parâmetro `--disk` define o tamanho do disco da instância. Todos esses foram configurados de acordo com a tabela abaixo:
+
+| Nome do perfil | vCPUs | Ram (GB) | Disk |
+|----------------|----------|------------|---------------------|
+| m1.tiny        | 1     | 1         | 20                  |
+| m1.small       | 1     | 2         | 20                  |
+| m1.medium      | 2     | 4         | 20                  |
+| m1.large       | 4     | 8        | 20                 |
+
+
+Criando a rede externa, que é a rede que vai permitir o acesso à internet. Para isso, utilizamos o comando `openstack network create` que cria uma rede no OpenStack. O comando é utilizado para criar uma rede externa que pode ser utilizada para conectar as instâncias de máquinas virtuais à internet.
+
+```bash
+openstack network create --external --share- \
+   --provider-network-type flat -provider-physical-network physnet1 \
+    ext_net
+```
+
+E uma sub-rede externa, que é a sub-rede que vai permitir o acesso com o comando `openstack subnet create` que cria uma sub-rede no OpenStack. O comando é utilizado para criar uma sub-rede externa que pode ser utilizada para conectar as instâncias de máquinas virtuais à internet.
+
+```bash
+openstack subnet create --network ext_net --no-dhcp \
+   --gateway 172.16.0.1 --subnet-range 172.16.0.0/20 \
+   --allocation-pool start=172.16.7.0,end=172.16.8.255 \
+   ext_subnet
+```
+
+Criando uma rede interna, que é a rede que vai permitir a comunicação entre as instâncias de máquinas virtuais. Para isso, utilizamos o comando `openstack network create` que cria uma rede no OpenStack. O comando é utilizado para criar uma rede interna que pode ser utilizada para conectar as instâncias de máquinas virtuais.
+
+```bash
+openstack network create --internal user1_net
+```
+
+E uma sub-rede interna, que é a sub-rede que vai permitir a comunicação entre as instâncias de máquinas virtuais com o comando `openstack subnet create` que cria uma sub-rede no OpenStack. O comando é utilizado para criar uma sub-rede interna que pode ser utilizada para conectar as instâncias de máquinas virtuais.
+
+```bash
+openstack subnet create --network user1_net  \
+   --subnet-range 192.169.0.0/24 \
+   --allocation-pool start=192.169.0.10,end=192.169.0.100 \
+   user1_subnet
+```
+
+Por fim adicionamos a rota do user1 a subnet criada
+
+```bash
+openstack router create user1_router
+openstack router add subnet user1_router user1_subnet
+openstack router set user1_router --external-gateway ext_net
+```
+
