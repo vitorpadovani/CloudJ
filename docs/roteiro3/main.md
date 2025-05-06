@@ -495,3 +495,114 @@ openstack router add subnet user1_router user1_subnet
 openstack router set user1_router --external-gateway ext_net
 ```
 
+Para verificar se está tudo funcionando, criamos uma instância que como teste prático do ambiente completo que configuramos. Em outras palavras, ela é o primeiro "cliente" real da nuvem que montamos.
+
+```bash
+openstack server create --image jammy-amd64 --flavor m1.tiny \
+   --key-name user1 --network user1_net --security-group Allow_SSH \
+   client
+```
+
+Além disso, alocamos um IP flutuante para a instância criada, que é o IP que vai ser utilizado para acessar a instância de fora da nuvem. Agora teremos um IP externo e um IP interno.
+
+```bash
+FLOATING_IP=$(openstack floating ip create -f value -c floating_ip_address ext_net)
+openstack server add floating ip client $FLOATING_IP
+```
+
+### Tarefa 2
+Verificando se o acesso ao Dashboard do OpenStack está funcionando, ou seja, se conseguimos acessar a interface web do OpenStack.
+
+![Tela do Dashboard do MAAS](img/tarefa2-1.png)
+/// caption
+Dashboard do MAAS com as máquinas
+///
+
+![Tela do Dashboard do MAAS](img/tarefa2-2.png)
+/// caption
+Aba compute overview no OpenStack
+///
+
+![Tela do Dashboard do MAAS](img/tarefa2-3.png)
+/// caption
+Aba compute instances no OpenStack
+///
+
+![Tela do Dashboard do MAAS](img/tarefa2-4.png)
+/// caption
+Aba network topology no OpenStack
+///
+
+### Enumere as diferencas encontradas entre os prints das telas na Tarefa 1 e na Tarefa 2. ############################################################################
+## Explique como cada recurso foi criado.##############################################################################################
+
+Com a máquina nova, que estava reservada, iremos adicionar um novo nó de computação. O objetivo é preparar o ambiente para alta disponibilidade, maior desempenho e capacidade.
+
+```bash
+juju add-unit nova-compute
+```
+
+Além disso, convertemos o mesmo nó também em um nó de armazenamento .
+
+```bash
+juju add-unit --to <machine-id> ceph-osd
+```
+Usamos a maquina 3, que já estava reservada para isso. 
+
+
+### Faça um desenho de como é a sua arquitetura de rede, desde a sua conexão com o Insper até a instância alocada.###################################
+
+### Uso da Infraestrutura
+
+Para utilizar a infraestrutura criada, precisamos criar uma máquina virtual para cada tarefa especificada. Foi solicitado 2 instâncias com a API do projeto, etapa 1; 1 instância com banco de dados, etapa 1, e; 1 instância com LoadBalancer, Nginx.
+
+Para isso, fizemos novamente IPs flutuantes para cada instância criada, e utilizamos o mesmo processo de criação de instâncias que foi utilizado anteriormente. Apenas nesse início iremos continuar com todos os IPs externos, para podermos verificar se tudo está funcionando corretamente. Após os testes e instalações dos softwares, iremos retirar os IPs externos e deixar apenas no load balancer, para que possamos acessar o serviço de forma externa.
+
+Primeiro instalamos o docker em cada uma das máquinas virtuais que iriam receber as APIs, para isso utilizamos os seguintes comandos:
+
+```bash
+# Add Docker's official GPG key:
+sudo apt-get update
+sudo apt-get install ca-certificates curl
+sudo install -m 0755 -d /etc/apt/keyrings
+sudo curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc
+sudo chmod a+r /etc/apt/keyrings/docker.asc
+
+# Add the repository to Apt sources:
+echo \
+  "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu \
+  $(. /etc/os-release && echo "${UBUNTU_CODENAME:-$VERSION_CODENAME}") stable" | \
+  sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+sudo apt-get update
+```
+
+```bash
+sudo apt-get install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+```
+
+Após isso, baixamos e rodamos a imagem do docker hub
+
+```bash
+sudo docker pull vitorpadova/projeto_cloud
+```
+
+```bash
+docker run -d -p 8080:80 vitorpadova/projeto_cloud
+```
+
+Para ver se a imagem está rodando, utilizamos o comando:
+
+```bash
+sudo docker ps -a
+```
+
+Fizemos o mesmo processo para a máquina que vai receber o banco de dados, mas nesse caso utilizamos a imagem do Postgres.
+
+Depois de instalar o docker, baixamos a imagem do Postgres e rodamos o container com o seguinte comando:
+
+```bash
+sudo docker run --name some-postgres -e POSTGRES_PASSWORD=mysecretpassword -d postgres
+```
+
+
+O mesmo processo foi feito para o LoadBalancer, mas nesse caso utilizamos a imagem do Nginx.
