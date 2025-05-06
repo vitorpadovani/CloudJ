@@ -274,9 +274,65 @@ juju integrate ceph-mon:client nova-compute:ceph
 juju integrate ceph-mon:client glance:ceph
 ```
 
-###############Falta o 15 16 e 17
+O Cinder é o serviço de armazenamento em bloco do OpenStack. Ele fornece volumes de armazenamento que podem ser anexados a instâncias de máquinas virtuais. Essa etapa consiste em configurar o serviço principal e integrá-lo com Ceph como backend.
 
+A configuração do cinder é feita através de um arquivo YAML, onde definimos o backend de armazenamento e a versão da API do Glance.
 
+```bash
+cinder:
+  block-device: None
+  glance-api-version: 2
+```
+
+```bash
+juju deploy --to lxd:1 --channel yoga/stable --config cinder.yaml cinder
+```
+
+```bash
+juju deploy --channel 8.0/stable mysql-router cinder-mysql-router
+juju integrate cinder-mysql-router:db-router mysql-innodb-cluster:db-router
+juju integrate cinder-mysql-router:shared-db cinder:shared-db
+```
+
+Essas próximas relações conectam o Cinder com os serviços principais do OpenStack: identidade (Keystone), imagens (Glance), mensageria (RabbitMQ), orquestração de volumes (Nova), e certificados (Vault)
+
+```bash
+juju integrate cinder:cinder-volume-service nova-cloud-controller:cinder-volume-service
+juju integrate cinder:identity-service keystone:identity-service
+juju integrate cinder:amqp rabbitmq-server:amqp
+juju integrate cinder:image-service glance:image-service
+juju integrate cinder:certificates vault:certificates
+```
+
+Para que o Cinder use o Ceph como backend:
+
+```bash
+juju deploy --channel yoga/stable cinder-ceph
+```
+
+```bash
+juju integrate cinder-ceph:storage-backend cinder:storage-backend
+juju integrate cinder-ceph:ceph ceph-mon:client
+juju integrate cinder-ceph:ceph-access nova-compute:ceph-access
+```
+
+O Ceph RADOS Gateway (RGW) é um serviço de armazenamento de objetos que fornece uma interface compatível com S3 e Swift. Ele funciona como alternativa ao serviço OpenStack Swift ou Amazon S3.
+
+```bash
+juju deploy --to lxd:0 --channel quincy/stable ceph-radosgw
+```
+
+Integrando o Ceph RADOS Gateway com o cluster do Ceph. Essa relação conecta o gateway aos monitores do Ceph, permitindo o gerenciamento de pools e autenticação de usuários S3/Swift
+
+```bash
+juju integrate ceph-radosgw:mon ceph-mon:radosgw
+```
+
+Por fim, como a aplicação do Ceph-OSD já foi realizada, precisamos fazer a integração dele para finalizar a etapa de configuração da infraestrutura. A relação proposta vai funcionar para configuração do charm para uso do disco `/dev/sdb`, que vai ser utilizado para armazenamento.
+
+```bash
+juju config ceph-osd osd-devices='/dev/sdb'
+```
 
 
 Iremos agora configurar os serviços que controlam as Virtual Machines, o Volume de Disco e a Estrutura de Rede Virtual
