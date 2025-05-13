@@ -601,8 +601,57 @@ Fizemos o mesmo processo para a máquina que vai receber o banco de dados, mas n
 Depois de instalar o docker, baixamos a imagem do Postgres e rodamos o container com o seguinte comando:
 
 ```bash
-sudo docker run --name some-postgres -e POSTGRES_PASSWORD=mysecretpassword -d postgres
+sudo docker run --env-file .env vitorpadova/projeto_cloud
 ```
 
 
 O mesmo processo foi feito para o LoadBalancer, mas nesse caso utilizamos a imagem do Nginx.
+
+Depois de tudo, ligamos o LoadBalancer com as APIs e o Banco de Dados, para isso criamos um arquivo de configuração env com as variáveis de ambiente necessárias para o funcionamento.
+
+
+Por fim, removemos os IPs flutuantes das instâncias, exceto do LoadBalancer, para que possamos acessar o serviço de forma externa.
+
+```bash
+openstack server remove floating ip client $FLOATING_IP
+```
+
+
+## Tarefa 4
+
+Verificando se o app está funcionando.
+
+![Tela do Dashboard do MAAS](img/tarefa4-2.png)
+/// caption
+Arquitetura de rede da infraestrutura
+///
+
+![Tela do Dashboard do MAAS](img/tarefa4-3.png)
+/// caption
+Lista de VMs utilizadas com nome e IPs alocados
+///
+
+![Tela do Dashboard do MAAS](img/tarefa4-4.png)
+/// caption
+Dashboard do FastAPI conectado via máquina Nginx/LB
+///
+
+![Tela do Dashboard do MAAS](img/tarefa4-5-1.png)
+/// caption
+Server (máquina física) que Load Balancer foi alocado pelo OpenStack
+///
+
+![Tela do Dashboard do MAAS](img/tarefa4-5-2.png)
+/// caption
+Server (máquina física) que Base de Dados foi alocada pelo OpenStack
+///
+
+![Tela do Dashboard do MAAS](img/tarefa4-5-3.png)
+/// caption
+Server (máquina física) que API 1 foi alocada pelo OpenStack
+///
+
+![Tela do Dashboard do MAAS](img/tarefa4-5-4.png)
+/// caption
+Server (máquina física) que API 2 foi alocada pelo OpenStack
+///
