@@ -75,3 +75,80 @@ OBS: Cada aluno criou um nome diferente para a rede, então é necessário alter
 
 Fizemos a mesma coisa para o arquivo `instance2.tf`, que é o arquivo que contém as informações da instância que queremos criar. Esse arquivo deve conter as seguintes informações:
 
+Para o router, vamos criar um arquivo chamado `router.tf`, que é o arquivo que contém as informações do roteador que queremos criar. Esse arquivo deve conter as seguintes informações:
+
+```bash
+  GNU nano 6.2                                                        router.tf                                                                 resource "openstack_networking_router_v2" "router_2" {
+  name                = "user2_router"
+  admin_state_up      = true
+  external_network_id = "dc9a9a31-6c93-4eb5-9525-9db2cfe89b4d"
+}
+
+resource "openstack_networking_router_interface_v2" "int_2" {
+  router_id = openstack_networking_router_v2.router_2.id
+  subnet_id = openstack_networking_subnet_v2.subnet_2.id
+}
+```
+
+Por fim, com o terraform instalado e os arquivos criados, vamos criar a infraestrutura. Para isso, basta executar os seguintes comandos:
+
+```bash
+terraform init
+terraform plan
+terraform apply
+```
+
+Após executar o comando `terraform apply`, o Terraform irá criar a infraestrutura desejada. Para verificar se a infraestrutura foi criada corretamente, basta acessar o dashboard do OpenStack e verificar se as instâncias foram criadas corretamente.
+
+## Exercícios Alunos em Conjunto
+
+![Tela do Dashboard do MAAS](img/aluno1-tarefa1.png)
+/// caption
+Aba Identity projects no OpenStack
+///
+
+![Tela do Dashboard do MAAS](img/aluno1-tarefa2.png)
+/// caption
+Aba Identity users no OpenStack
+///
+
+## Exercícios Aluno 1
+
+![Tela do Dashboard do MAAS](img/aluno1-tarefa3.png)
+/// caption
+Aba compute overview no OpenStack Dashboard
+///
+
+![Tela do Dashboard do MAAS](img/aluno1-tarefa4.png)
+/// caption
+Aba compute instances no OpenStack Dashboard
+///
+
+![Tela do Dashboard do MAAS](img/aluno1-tarefa5.png)
+/// caption
+Aba network topology no OpenStack Dashboard
+///
+
+
+## Exercícios Aluno 2
+
+
+![Tela do Dashboard do MAAS](img/aluno2-tarefa3.png)
+/// caption
+Aba compute overview no OpenStack Dashboard
+///
+
+![Tela do Dashboard do MAAS](img/aluno2-tarefa4.png)
+/// caption
+Aba compute instances no OpenStack Dashboard
+///
+
+![Tela do Dashboard do MAAS](img/aluno2-tarefa5.png)
+/// caption
+Aba network topology no OpenStack Dashboard
+///
+
+
+## Plano de Disaster Recovery e SLA
+###### ##########
+###### ##########
