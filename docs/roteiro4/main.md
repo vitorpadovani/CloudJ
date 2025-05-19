@@ -102,29 +102,29 @@ Após executar o comando `terraform apply`, o Terraform irá criar a infraestrut
 
 ## Exercícios Alunos em Conjunto
 
-![Tela do Dashboard do MAAS](img/aluno1-tarefa1.png)
+![Tela do Dashboard do MAAS](img/aluno1-tarefa1.jpg)
 /// caption
 Aba Identity projects no OpenStack
 ///
 
-![Tela do Dashboard do MAAS](img/aluno1-tarefa2.png)
+![Tela do Dashboard do MAAS](img/aluno1-tarefa2.jpg)
 /// caption
 Aba Identity users no OpenStack
 ///
 
 ## Exercícios Aluno 1
 
-![Tela do Dashboard do MAAS](img/aluno1-tarefa3.png)
+![Tela do Dashboard do MAAS](img/aluno1-tarefa3.jpg)
 /// caption
 Aba compute overview no OpenStack Dashboard
 ///
 
-![Tela do Dashboard do MAAS](img/aluno1-tarefa4.png)
+![Tela do Dashboard do MAAS](img/aluno1-tarefa4.jpg)
 /// caption
 Aba compute instances no OpenStack Dashboard
 ///
 
-![Tela do Dashboard do MAAS](img/aluno1-tarefa5.png)
+![Tela do Dashboard do MAAS](img/aluno1-tarefa5.jpg)
 /// caption
 Aba network topology no OpenStack Dashboard
 ///
@@ -149,6 +149,39 @@ Aba network topology no OpenStack Dashboard
 ///
 
 
-## Plano de Disaster Recovery e SLA
-###### ##########
-###### ##########
+## Plano de Disaster Recovery e SLA (Exercício)
+
+Considerando um cenário em que somos o CTO (Chief Technology Officer) de uma grande empresa com sede em várias capitais no Brasil e precisamos implantar um sistema crítico, de baixo custo e com dados sigilosos para a área operacional.
+
+1. Public Cloud ou Private Cloud?
+    - A empresa deve optar por uma Private Cloud, pois os dados são sigilosos e a empresa não pode correr o risco de vazamento de dados. Além disso, a empresa possui um grande número de servidores e pode manter uma infraestrutura própria.
+
+2. Por que a empresa precisa de um time de DevOps?
+    - A empresa precisa de um time de DevOps para garantir que a infraestrutura esteja sempre disponível e funcionando corretamente. Além disso, o time de DevOps é responsável por automatizar os processos de implantação e gerenciamento da infraestrutura, garantindo agilidade e eficiência.
+
+3. Plano de DR (Disaster Recovery) e HA (Alta Disponibilidade)
+    - As principais ameaças são: 
+      - Queda de energia ou falha de hardware em datacenters regionais
+
+      - Ataques cibernéticos como ransomware ou vazamento de dados operacionais
+
+      - Erros humanos em atualizações manuais ou configurações incorretas
+
+      - Falhas de rede
+
+      - Indisponibilidade de recursos de cloud ou fornecedores externos
+
+4. Ações para a recuperação de seu ambiente em uma possível interrupção/desastre
+    - Backup diário dos dados e configuração da infraestrutura
+
+    - Monitoramento constante da infraestrutura e dos serviços
+
+    - Testes periódicos de recuperação de desastres
+
+    - Treinamento da equipe para lidar com situações de emergência
+
+5. Política de backup
+    - A política de backup deve ser definida de acordo com a criticidade dos dados e serviços. Os backups devem ser realizados diariamente e armazenados em locais diferentes da infraestrutura principal. Além disso, os backups devem ser testados periodicamente para garantir que estão funcionando corretamente.	
+
+6. Alta disponibilidade implementada na infraestrutura
+    - A alta disponibilidade deve ser implementada por meio de redundância de hardware e software. Isso pode ser feito por meio de clusters de servidores, balanceadores de carga e replicação de dados. Além disso, a infraestrutura deve ser monitorada constantemente para garantir que os serviços estejam sempre disponíveis.

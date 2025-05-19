@@ -1,8 +1,12 @@
-Objetivo: Criar uma Private Cloud com OpenStack
+## Objetivo
+
+Criar uma Private Cloud com OpenStack
 
 Para esse projeto, vamos criar uma Cloud privada. Para isso vamos instalar vários softwares para deixar a cloud funcional.
 
 Os softwares serão instalados em máquinas, sempre buscando distribuir as cargas entre as máquinas. Para isso, utilizaremos o Juju, que é um software de orquestração de containers. O Juju é um software que permite gerenciar aplicações em nuvem, como OpenStack, Kubernetes, etc.
+
+## Infraestrutura
 
 Para iniciar o roteiro 3, precisamos criar novamente as bridges, dentro do maas, para que as máquinas virtuais possam receber IPs.
 
@@ -334,6 +338,7 @@ Por fim, como a aplicação do Ceph-OSD já foi realizada, precisamos fazer a in
 juju config ceph-osd osd-devices='/dev/sdb'
 ```
 
+## Setup
 
 Iremos agora configurar os serviços que controlam as Virtual Machines, o Volume de Disco e a Estrutura de Rede Virtual
 Primeiro, vamos carregar as variáveis de ambiente e se autenticar no OpenStack
@@ -513,28 +518,66 @@ openstack server add floating ip client $FLOATING_IP
 ### Tarefa 2
 Verificando se o acesso ao Dashboard do OpenStack está funcionando, ou seja, se conseguimos acessar a interface web do OpenStack.
 
-![Tela do Dashboard do MAAS](img/tarefa2-1.png)
+![Tela do Dashboard do MAAS](img/tarefa2-1.jpg)
 /// caption
 Dashboard do MAAS com as máquinas
 ///
 
-![Tela do Dashboard do MAAS](img/tarefa2-2.png)
+![Tela do Dashboard do MAAS](img/tarefa2-2.jpg)
 /// caption
 Aba compute overview no OpenStack
 ///
 
-![Tela do Dashboard do MAAS](img/tarefa2-3.png)
+![Tela do Dashboard do MAAS](img/tarefa2-3.jpg)
 /// caption
 Aba compute instances no OpenStack
 ///
 
-![Tela do Dashboard do MAAS](img/tarefa2-4.png)
+![Tela do Dashboard do MAAS](img/tarefa2-4.jpg)
 /// caption
 Aba network topology no OpenStack
 ///
 
-### Enumere as diferencas encontradas entre os prints das telas na Tarefa 1 e na Tarefa 2. ############################################################################
-## Explique como cada recurso foi criado.##############################################################################################
+#### Diferenças encontradas entre os prints das telas na Tarefa 1 e na Tarefa 2
+
+**Instâncias:**
+
+Na Tarefa 1, o painel mostra nenhuma instância criada, pois o ambiente ainda não foi completamente configurado.
+
+Na Tarefa 2, já existe uma instância do tipo m1.tiny chamada client, indicando que os recursos de computação foram corretamente configurados e utilizados.
+
+**Topologia de Rede:**
+
+Na Tarefa 1, a topologia está vazia, com ausência de redes, roteador e associações entre eles.
+
+Na Tarefa 2, a topologia exibe demonstra que toda a estrutura lógica de rede está funcional visto que:
+
+   - A rede ext_net (azul) com faixa 172.16.0.0/24 representa a rede externa, usada para acesso público via Floating IP.
+
+   - A rede user1_net (laranja) com faixa 192.168.0.0/24 é a rede interna, onde ficam as instâncias.
+
+   - Um roteador foi criado conectando as duas redes, permitindo roteamento entre instâncias privadas e a rede externa.
+
+**Overview:**
+
+Na Tarefa 1, os gráficos e métricas indicam zero uso de vCPUs, RAM e disco, refletindo a ausência de workloads ativos.
+
+Na Tarefa 2, essas métricas apresentam uso compatível com a instância m1.tiny ativa, evidenciando o provisionamento correto dos recursos de infraestrutura
+
+#### Como os recursos foram criados
+
+- Instância client:
+
+A instância client foi criada utilizando, especificando a imagem, flavor e key pair, utilizamos também o m1.tiny que é o mais leve pois não é necessário muito recurso. Por fim foi alocado um IP flutuante para acesso externo.
+
+- Rede e sub-rede:
+
+Foram criadas duas redes no OpenStack: ext_net (externa, faixa 172.16.0.0/24) e user1_net (interna, faixa 192.168.0.0/24).
+
+- Conexão:
+
+A conexão entre as redes foi feita através de um roteador, que conecta a rede interna à externa, permitindo comunicação entre instâncias e acesso à internet.
+
 
 Com a máquina nova, que estava reservada, iremos adicionar um novo nó de computação. O objetivo é preparar o ambiente para alta disponibilidade, maior desempenho e capacidade.
 
@@ -549,10 +592,16 @@ juju add-unit --to <machine-id> ceph-osd
 ```
 Usamos a maquina 3, que já estava reservada para isso. 
 
+### Tarefa 3
 
-### Faça um desenho de como é a sua arquitetura de rede, desde a sua conexão com o Insper até a instância alocada.###################################
+Nossa estrutura de rede nesse momento está assim:
 
-### Uso da Infraestrutura
+![Tela do Dashboard do MAAS](img/tarefa3.png)
+/// caption
+Arquitetura de rede da infraestrutura
+///
+
+## Uso da Infraestrutura
 
 Para utilizar a infraestrutura criada, precisamos criar uma máquina virtual para cada tarefa especificada. Foi solicitado 2 instâncias com a API do projeto, etapa 1; 1 instância com banco de dados, etapa 1, e; 1 instância com LoadBalancer, Nginx.
 
@@ -617,41 +666,41 @@ openstack server remove floating ip client $FLOATING_IP
 ```
 
 
-## Tarefa 4
+### Tarefa 4
 
 Verificando se o app está funcionando.
 
-![Tela do Dashboard do MAAS](img/tarefa4-2.png)
+![Tela do Dashboard do MAAS](img/tarefa4-2.jpg)
 /// caption
 Arquitetura de rede da infraestrutura
 ///
 
-![Tela do Dashboard do MAAS](img/tarefa4-3.png)
+![Tela do Dashboard do MAAS](img/tarefa4-3.jpg)
 /// caption
 Lista de VMs utilizadas com nome e IPs alocados
 ///
 
-![Tela do Dashboard do MAAS](img/tarefa4-4.png)
+![Tela do Dashboard do MAAS](img/tarefa4-4.jpg)
 /// caption
 Dashboard do FastAPI conectado via máquina Nginx/LB
 ///
 
-![Tela do Dashboard do MAAS](img/tarefa4-5-1.png)
+![Tela do Dashboard do MAAS](img/tarefa4-5-1.jpg)
 /// caption
 Server (máquina física) que Load Balancer foi alocado pelo OpenStack
 ///
 
-![Tela do Dashboard do MAAS](img/tarefa4-5-2.png)
+![Tela do Dashboard do MAAS](img/tarefa4-5-2.jpg)
 /// caption
 Server (máquina física) que Base de Dados foi alocada pelo OpenStack
 ///
 
-![Tela do Dashboard do MAAS](img/tarefa4-5-3.png)
+![Tela do Dashboard do MAAS](img/tarefa4-5-3.jpg)
 /// caption
 Server (máquina física) que API 1 foi alocada pelo OpenStack
 ///
 
-![Tela do Dashboard do MAAS](img/tarefa4-5-4.png)
+![Tela do Dashboard do MAAS](img/tarefa4-5-4.jpg)
 /// caption
 Server (máquina física) que API 2 foi alocada pelo OpenStack
 ///

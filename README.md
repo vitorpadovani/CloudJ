@@ -14,6 +14,12 @@ Ative o ambiente virtual (**você deve fazer isso sempre que for executar algum 
 source ./env/bin/activate
 ```
 
+No Windows, o comando para ativar o ambiente virtual é:
+
+``` shell
+.\env\Scripts\Activate.ps1
+```
+
 Instale as dependências com:
 
 ``` shell
