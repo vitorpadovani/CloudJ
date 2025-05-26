@@ -596,10 +596,31 @@ Usamos a maquina 3, que já estava reservada para isso.
 
 Nossa estrutura de rede nesse momento está assim:
 
-![Tela do Dashboard do MAAS](img/tarefa3.png)
-/// caption
-Arquitetura de rede da infraestrutura
-///
+
+```mermaid
+flowchart LR
+    internet(((Internet)))
+    router([Roteador Insper<br>10.0.0.0/8])
+    minhaMaquina([Minha Máquina<br>10.103.1.19<br>])
+
+    subgraph Subrede_Neutron [Subrede Neutron<br>192.169.0.0/24]
+        1b([" "])
+        lb([Load Balancer])
+        api1([API 1])
+        api2([API 2])
+        db([Database])
+
+        lb --> api1
+        lb --> api2
+        api1 --> db
+        api2 --> db
+    end
+
+    internet --> router
+    router --> minhaMaquina
+    minhaMaquina -- Request<br>172.16.0.0/20 --> lb
+```
+
 
 ## Uso da Infraestrutura
 

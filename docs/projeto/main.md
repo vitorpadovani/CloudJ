@@ -205,3 +205,11 @@ Portanto conseguimos desenvolver conceitos como por exemplo:
 - [Postgres](https://hub.docker.com/_/postgres)
 - [Video Tutorial Docker Hub](https://www.youtube.com/watch?v=iqqDU2crIEQ&t=1002s)
 - [CoinMarketCap](https://coinmarketcap.com/)
+
+
+## Etapa 2
+
+### 1.1 - Descrição do projeto
+
+### Lightsail
+
