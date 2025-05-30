@@ -19,7 +19,7 @@ Vitor Padovani
 - [x] Roteiro 2 - Data 13/03/2025
 - [x] Roteiro 3 - Data 13/05/2025
 - [x] Roteiro 4 - Data 19/05/2025
-- [ ] Projeto
+- [x] Projeto - Data 30/05/2025
 
 
 ## Referências

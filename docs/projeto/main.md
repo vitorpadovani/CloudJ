@@ -211,5 +211,178 @@ Portanto conseguimos desenvolver conceitos como por exemplo:
 
 ### 1.1 - Descrição do projeto
 
-### Lightsail
+Essa segunda etapa do projeto consiste em realizar o deploy da aplicação desenvolvida na Etapa 1 em um serviço de nuvem, utilizando o AWS Lightsail. O objetivo é disponibilizar a API para acesso público, permitindo que usuários possam interagir com a aplicação através da internet. Portanto foi necessário aprender sobre o serviço AWS Lightsail, que oferece uma maneira simples e econômica de hospedar aplicações na nuvem. Durante o projeto serão abordados os temas de criação de banco de dados, configuração de container, deploy da aplicação e gastos com os serviços utilizados.
 
+### 1.2 - Permissões e criação da conta
+
+Para utilizar o AWS Lightsail, foi necessário criar uma conta na AWS, através do IAM, com permissões de administrador. Após a criação da conta, foi possível acessar o console do AWS Lightsail.
+
+![Tela Permissões User](img/projeto2-permissoes.png)
+/// caption
+Tela de Permissões do Usuário no AWS IAM
+///
+
+### 2.1 - Criação do container
+
+Inicialmente, foi necessário criar um container no AWS Lightsail para hospedar a aplicação. O serviço desse container foi criado em Virginia, Estados Unidos, (us-east-1), que é uma das regiões disponíveis no AWS Lightsail. A criação do container foi feita através do console do AWS Lightsail, onde foram configurados os parâmetros necessários. Para esse container utilizamos a capacidade de 1 GB de Memória RAM, 0.25 vCPU de processamento, sendo esse um power Micro, além disso definimos que o container teria uma escala de 1 node, o que significa que teríamos apenas um container rodando. 
+
+Isso nos resultaria em um custo de $10 USD por mês (sendo que o valor não é cobrado pelos primeiros 3 meses, devido ao período de testes gratuito do AWS Lightsail).
+
+![Tela Criação Container](img/projeto2-criacaoContainer.png)
+/// caption
+Tela de Criação do Container no AWS Lightsail
+///
+
+![Tela Container](img/projeto2-container.png)
+/// caption
+Tela de Container rodando no AWS Lightsail
+///
+
+
+### 2.2 - Criação do banco de dados
+
+Para que a aplicação fosse realizada com sucesso, foi necessário criar um banco de dados no AWS Lightsail. O banco de dados utilizado foi o PostgreSQL (17.5), que é compatível com a aplicação desenvolvida. A criação do banco de dados foi feita através do console do AWS Lightsail, onde foram configurados os parâmetros necessários, como nome do banco, usuário e senha. Este banco de dados foi criado com as configurações de 1 GB de Memória, 2 vCPUs de processamento, 40 GB SSD de armazenamento e 100 GB de transferência de dados. Também foi configurado na mesma região do container, ou seja, em Virginia Zona A (us-east-1a).
+
+Nos resultou em um custo de $15 USD por mês (sendo que o valor não é cobrado pelos primeiros 3 meses, devido ao período de testes gratuito do AWS Lightsail).
+
+![Tela Criação Banco de Dados](img/projeto2-criacaoBanco1.png)
+/// caption
+Tela de Criação do Banco de Dados (Região e Tipo de Banco)
+///
+
+![Tela Criação Banco de Dados](img/projeto2-criacaoBanco2.png)
+/// caption
+Tela de Criação do Banco de Dados (Plano de Preço e Configurações)
+///
+
+![Tela DB](img/projeto2-db.png)
+/// caption
+Tela da Base de Dados disponível no AWS Lightsail
+///
+
+### 2.3 - Deploy da aplicação
+
+Para realizar o deploy da aplicação no AWS Lightsail, foi necessário configurar o container criado anteriormente. Essa etapa envolveu a integração do container com o banco de dados PostgreSQL, garantindo que a aplicação pudesse se conectar ao banco e realizar as operações necessárias.
+
+Iniciamos o processo deixando o banco de dados como "Public Mode", o que significa que ele pode ser acessado de fora do AWS Lightsail, permitindo que a aplicação se conecte a ele. Em seguida, foi necessário configurar as variáveis de ambiente no container, como a imagem que definida sendo a `vitorpadova/projeto_cloud:latest`, além de outras variáveis como `DATABASE_URL`, `MEUUSUARIO`, `MINHASENHADB` e `POSTGRES_BANCO`, para que a aplicação pudesse se conectar ao banco de dados corretamente.
+
+Sendo assim, a variável `DATABASE_URL` foi configurada com o seguinte formato:
+
+```bash
+postgresql://MEUUSUARIO:MINHASENHADB@POSTGRES_BANCO:portaBanco/master
+```
+
+Onde:
+
+- `MEUUSUARIO`: é o usuário do banco de dados criado no AWS Lightsail.
+
+- `MINHASENHADB`: é a senha do usuário do banco de dados.
+
+- `POSTGRES_BANCO`: é a URL (endpoint) do banco de dados fornecida pelo AWS Lightsail.
+
+- `portaBanco`: é a porta do banco de dados (geralmente 5432 para PostgreSQL).
+
+- `master`: é o nome do banco de dados que será utilizado pela aplicação (master database name).
+
+#### 2.3.1 Correção no projeto
+
+Para conclusão do deploy, foi necessário realizar uma correção no projeto, pois não havíamos feito o /healthcheck no Dockerfile. Portanto, foi necessário adicionar o seguinte comando no Dockerfile:
+
+```bash
+@app.get("/health_check", status_code=200)
+def health_check():
+    return {"health_check": gethostname()}
+```
+
+Isso cria um endpoint `/health_check` que retorna o nome do host da aplicação, permitindo que o AWS Lightsail verifique o estado da aplicação. Após essa correção, foi possível realizar o deploy da aplicação com sucesso.
+
+### 3.1 - Verificação do deploy
+
+Após o deploy da aplicação no Lightsail, foi fornecido um domínio para acessar a aplicação. Com isso, foi possível acessar a documentação da API gerada pelo FastAPI, onde é possível visualizar os endpoints disponíveis e realizar testes diretamente pela interface.
+
+#### 3.1.1 Link da API
+
+- Link: [https://fastapi-service.nz5y2v08qbr6m.us-east-1.cs.amazonlightsail.com/docs](https://fastapi-service.nz5y2v08qbr6m.us-east-1.cs.amazonlightsail.com/docs)
+
+### 3.2 - Testes da API
+
+Com a API acessível, foram realizados testes nos endpoints disponíveis, utilizando a documentação gerada pelo FastAPI. Os testes foram realizados com sucesso, validando o funcionamento correto da API no ambiente de produção.
+
+Foi possível visualizar a criação de usuários através de um script de teste que printa os 5 usuários cadastrados, o que mostrou que a aplicação está funcionando e a base de dados está sendo acessada corretamente. O script utilizado para testar a API foi o seguinte:
+
+```python
+import psycopg2
+
+conn = psycopg2.connect(
+    host="seu-endpoint",
+    port=5432,
+    user="seu-usuario",
+    password="sua-senha",
+    dbname="seu-banco"
+)
+
+cur = conn.cursor()
+cur.execute("SELECT * FROM usuarios LIMIT 5;")
+rows = cur.fetchall()
+
+for row in rows:
+    print(row)
+
+cur.close()
+conn.close()
+```
+OBS: É necessário substituir `seu-endpoint`, `seu-usuario`, `sua-senha` e `seu-banco` pelos valores correspondentes ao seu banco de dados no AWS Lightsail. 
+
+#### 3.2.1 Vídeo de execução da aplicação
+
+- Link do vídeo: [https://youtu.be/4t3TXGocu9g](https://youtu.be/4t3TXGocu9g)
+
+
+### 4.1 - Gastos com os serviços utilizados
+
+Os gastos com os serviços utilizados no AWS Lightsail foram os seguintes:
+
+- **Container**: $10 USD por mês
+
+- **Banco de Dados**: $15 USD por mês 
+
+OBS: Esses valores são referentes ao plano de preços escolhido e podem variar dependendo do uso e da região escolhida. Além disso, o AWS Lightsail oferece um período de testes gratuito de 3 meses, onde não há cobrança pelos serviços utilizados.
+
+Portanto, o custo total mensal para manter a aplicação no AWS Lightsail seria de $25 USD, considerando os serviços de container e banco de dados.
+
+O gasto também é calculado por impostos e GB transferidos, que são cobrados de acordo com o uso da aplicação. Portanto, é importante monitorar esses valores para evitar surpresas na fatura mensal.
+
+Além disso é possível utilizar o AWS Cost Explorer para monitorar os gastos e otimizar os recursos utilizados, garantindo que a aplicação esteja rodando de forma eficiente e econômica.
+
+![Tela Gastos](img/projeto2-gastos.png)
+/// caption
+Tela de Gastos do AWS Lightsail
+///
+
+A previsão para os próximos meses é de que os gastos permaneçam dentro do esperado, considerando o uso da aplicação e os serviços contratados, que seria de $25 USD mensais. 
+
+### 5.1 - Conclusão
+
+O projeto foi finalizado com êxito, com a aplicação desenvolvida na Etapa 1 sendo implantada em um ambiente de nuvem utilizando o AWS Lightsail. A API está disponível publicamente, permitindo que qualquer usuário acesse e utilize suas funcionalidades pela internet.
+
+A solução foi completamente containerizada e configurada para se comunicar com um banco de dados PostgreSQL, assegurando o armazenamento seguro e eficiente das informações dos usuários. Todos os testes realizados no ambiente de produção confirmaram que a API funciona corretamente, com todas as funcionalidades operando como planejado.
+
+Durante esse processo, foi possível adquirir conhecimentos práticos sobre o AWS Lightsail, uma plataforma que oferece uma opção simplificada e econômica para hospedagem em nuvem. A configuração tanto do container quanto do banco de dados foi realizada de forma ágil, permitindo colocar a aplicação no ar rapidamente.
+
+Dessa forma, foi possível consolidar diversos aprendizados importantes, como:
+
+- Realizar o deploy de uma aplicação em um serviço de nuvem utilizando o AWS Lightsail;
+
+- Configurar containers e bancos de dados dentro da plataforma;
+
+- Estabelecer a integração entre a aplicação e o banco de dados PostgreSQL;
+
+- Validar, por meio de testes, o correto funcionamento da API no ambiente de produção;
+
+- Acompanhar e controlar os custos relacionados aos serviços contratados na AWS Lightsail.
+
+### 5.2 - Referências
+- [Site da Disciplina](https://insper.github.io/computacao-nuvem/)
+- [AWS Lightsail](https://aws.amazon.com/pt/lightsail/)
+- [AWS IAM](https://aws.amazon.com/pt/iam/)
+- [AWS Cost Explorer](https://aws.amazon.com/pt/aws-cost-management/aws-cost-explorer/)
