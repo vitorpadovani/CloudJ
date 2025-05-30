@@ -1225,12 +1225,27 @@ Primeiro, vamos carregar as variáveis de ambiente e se autenticar no OpenStack<
 Usamos a maquina 3, que já estava reservada para isso. </p>
 <h3 id="tarefa-3">Tarefa 3</h3>
 <p>Nossa estrutura de rede nesse momento está assim:</p>
-<figure>
-<p><a class="glightbox" href="../img/tarefa3.png" data-type="image" data-width="auto" data-height="auto" data-desc-position="bottom"><img alt="Tela do Dashboard do MAAS" src="../img/tarefa3.png" /></a></p>
-<figcaption>
-<p>Arquitetura de rede da infraestrutura</p>
-</figcaption>
-</figure>
+<pre class="mermaid"><code>flowchart LR
+    internet(((Internet)))
+    router([Roteador Insper&lt;br&gt;10.0.0.0/8])
+    minhaMaquina([Minha Máquina&lt;br&gt;10.103.1.19&lt;br&gt;])
+
+    subgraph Subrede_Neutron [Subrede Neutron&lt;br&gt;192.169.0.0/24]
+        1b([" "])
+        lb([Load Balancer])
+        api1([API 1])
+        api2([API 2])
+        db([Database])
+
+        lb --&gt; api1
+        lb --&gt; api2
+        api1 --&gt; db
+        api2 --&gt; db
+    end
+
+    internet --&gt; router
+    router --&gt; minhaMaquina
+    minhaMaquina -- Request&lt;br&gt;172.16.0.0/20 --&gt; lb</code></pre>
 <h2 id="uso-da-infraestrutura">Uso da Infraestrutura</h2>
 <p>Para utilizar a infraestrutura criada, precisamos criar uma máquina virtual para cada tarefa especificada. Foi solicitado 2 instâncias com a API do projeto, etapa 1; 1 instância com banco de dados, etapa 1, e; 1 instância com LoadBalancer, Nginx.</p>
 <p>Para isso, fizemos novamente IPs flutuantes para cada instância criada, e utilizamos o mesmo processo de criação de instâncias que foi utilizado anteriormente. Apenas nesse início iremos continuar com todos os IPs externos, para podermos verificar se tudo está funcionando corretamente. Após os testes e instalações dos softwares, iremos retirar os IPs externos e deixar apenas no load balancer, para que possamos acessar o serviço de forma externa.</p>
